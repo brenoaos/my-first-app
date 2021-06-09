@@ -2,8 +2,11 @@ import React, { Component } from 'react';
 import { View, StyleSheet, Image, TouchableOpacity, Text, ScrollView, FlatList } from 'react-native';
 
 import moment from 'moment'
-
 import { DataTable } from 'react-native-paper';
+
+
+import Ads from './src/components/Ads'
+
 
 interface IAppState {
   timer?: moment.Moment;
@@ -91,6 +94,7 @@ export default class App extends Component<IAppProps, IAppState> {
 
     return (
       <View style={style.container}>
+        <Ads style={{flex: .3, flexDirection: 'row', marginBottom: 10}} />
         <Image style={style.image} source={require('./assets/imagens/cronometro.png')} />
         <Text style={style.contador}>{this.state.timer?.format('mm:ss:S')}</Text>
         <Text style={style.contadorVolta}>{this.state.timerVolta?.format('mm:ss:S')}</Text>
