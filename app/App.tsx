@@ -1,10 +1,16 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, Image, TouchableOpacity, Text } from 'react-native';
+import { View, StyleSheet, Image, TouchableOpacity, Text, ScrollView, FlatList } from 'react-native';
+
+import moment from 'moment'
+
+import { DataTable } from 'react-native-paper';
 
 interface IAppState {
-  timer?: number
+  timer?: moment.Moment;
+  timerVolta: moment.Moment;
   textBtnParar: string;
   textBtnIniciar: string;
+  voltas: any[];
 }
 
 
@@ -19,53 +25,93 @@ export default class App extends Component<IAppProps, IAppState> {
     super(props)
 
     this.state = {
-      timer: 0,
+      timer: moment().utcOffset(0).set({ hour: 0, minute: 0, second: 0, millisecond: 0 }),
+      timerVolta: moment().utcOffset(0).set({ hour: 0, minute: 0, second: 0, millisecond: 0 }),
       textBtnParar: 'Zerar',
       textBtnIniciar: 'Iniciar',
+      voltas: []
     }
 
-    this.iniciar = this.iniciar.bind(this)
-    this.zerar = this.zerar.bind(this)
+    this.btnEsquerdo = this.btnEsquerdo.bind(this)
+    this.btnDireito = this.btnDireito.bind(this)
   }
 
-  iniciar() {
+  btnEsquerdo() {
     if (!this.interval) {
       this.interval = setInterval(() => this.setState({
-        timer: (this.state.timer || 0) + 0.1
+        timer: this.state.timer?.add(100, 'millisecond'),
+        timerVolta: this.state.timerVolta?.add(100, 'millisecond')
       }), 100)
       this.setState({
         textBtnIniciar: 'Pausar',
+        textBtnParar: 'Volta'
       })
 
     }
     else {
       clearInterval(this.interval);
       this.interval = null;
-      return;
+      this.setState({
+        textBtnIniciar: 'Iniciar',
+        textBtnParar: 'Zerar'
+      })
     }
   }
 
-  zerar() {
+  btnDireito() {
+    if (this.interval) {
+      this.state.voltas.push({
+        id: (this.state.voltas.length + 1),
+        tempo: this.state.timerVolta.format('mm:ss:S'),
+      })
+      this.setState({
+        timerVolta: this.state.timerVolta.set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
+      })
+    } else {
+      this.setState({
+        timer: this.state.timer?.set({ hour: 0, minute: 0, second: 0, millisecond: 0 }),
+        timerVolta: this.state.timerVolta.set({ hour: 0, minute: 0, second: 0, millisecond: 0 }),
+        voltas: []
+      })
+    }
 
-    this.setState({
-      timer: 0,
-    })
 
   }
 
   render() {
+
+    let dataTableRow = this.state.voltas.map(volta => {
+      return (
+        <DataTable.Row>
+          <DataTable.Cell style={style.dataTableRowText}> {volta.id} </DataTable.Cell>
+          <DataTable.Cell style={style.dataTableRowText}> {volta.tempo} </DataTable.Cell>
+        </DataTable.Row>
+      )
+    })
+
     return (
       <View style={style.container}>
         <Image style={style.image} source={require('./assets/imagens/cronometro.png')} />
-        <Text style={style.contador}>{this.state.timer?.toFixed(1)}</Text>
+        <Text style={style.contador}>{this.state.timer?.format('mm:ss:S')}</Text>
+        <Text style={style.contadorVolta}>{this.state.timerVolta?.format('mm:ss:S')}</Text>
         <View style={style.botoeira}>
-          <TouchableOpacity style={style.botao} onPress={this.iniciar}>
+          <TouchableOpacity style={style.botao} onPress={this.btnEsquerdo}>
             <Text style={style.btnText}>{this.state.textBtnIniciar}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={style.botao} onPress={this.zerar}>
+          <TouchableOpacity style={style.botao} onPress={this.btnDireito}>
             <Text style={style.btnText}>{this.state.textBtnParar}</Text>
           </TouchableOpacity>
         </View>
+
+        <DataTable style={style.dataTableArea}>
+          <DataTable.Header style={style.dataTableHeader}>
+            <DataTable.Title style={style.dataTableHeaderText} >Volta</DataTable.Title>
+            <DataTable.Title style={style.dataTableHeaderText} >Tempo</DataTable.Title>
+          </DataTable.Header>
+          <ScrollView>
+            {dataTableRow}
+          </ScrollView>
+        </DataTable>
       </View>
     )
   }
@@ -81,14 +127,47 @@ const style = StyleSheet.create({
     paddingTop: 0
   },
   contador: {
-    marginTop: -170,
+    marginTop: -160,
     color: '#FFF',
-    fontSize: 65,
+    fontSize: 40,
     fontWeight: 'bold'
+  },
+  contadorVolta: {
+    color: '#FFF',
+    fontSize: 20,
+  },
+  voltasArea: {
+    flexDirection: 'row',
+    width: 200,
+    padding: 10,
+    borderRadius: 10
   },
   botoeira: {
     flexDirection: 'row',
-    marginTop: 70
+    marginTop: 70,
+  },
+  dataTableArea: {
+    flex: 1,
+    borderWidth: 2,
+    borderColor: '#FFF',
+    height: 200,
+    marginBottom: 0,
+    marginLeft: 15,
+    marginRight: 15,
+    borderRadius: 10,
+  },
+  dataTableHeader: {
+    backgroundColor: '#FFF',
+    color: '#00eaaf',
+    fontSize: 50
+  },
+  dataTableHeaderText: {
+    justifyContent: 'center',
+    color: '#FFF'
+  },
+  dataTableRowText: {
+    textAlign: 'center',
+    justifyContent: 'center',
   },
   botao: {
     flex: 1,
