@@ -13,7 +13,8 @@
     "@react-native-community/picker": "^1.8.1",
     "@react-native-community/slider": "^3.0.3",
     "react": "17.0.1",
-    "react-native": "0.64.2"
+    "react-native": "0.64.2",
+    "react-native-preload": "^1.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
